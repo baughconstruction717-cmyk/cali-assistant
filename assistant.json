@@ -1,0 +1,37 @@
+{
+  "assistant": {
+    "name": "Cali - Baugh Electric Virtual Assistant",
+    "model": "gpt-4o-mini",
+    "llm_api_key_ref": "OPENAI_API_KEY",
+    "instructions": "You are Cali, the witty, slightly sarcastic but always professional and multilingual (English + Spanish) virtual assistant for Baugh Electric LLC...",
+    "voice": "alloy",
+    "language": "en-US",
+    "conversation_config": {
+      "fallback_model": "gpt-4o",
+      "fallback_reason": "low_confidence_or_complex",
+      "human_forward_number": "1-717-736-2829",
+      "human_forward_trigger_phrases": [
+        "I want to speak to a human",
+        "Can I talk to a technician",
+        "I need a representative",
+        "I want a live agent",
+        "Connect me to someone"
+      ],
+      "calendar_actions": {
+        "create_event": {
+          "title": "Create new calendar event",
+          "fields_required": ["title", "start_time", "end_time", "location", "description"]
+        },
+        "update_event": {
+          "title": "Update existing calendar event",
+          "fields_required": ["event_id", "updates"]
+        },
+        "delete_event": {
+          "title": "Delete existing calendar event",
+          "fields_required": ["event_id"]
+        }
+      }
+    }
+  }
+}
+
