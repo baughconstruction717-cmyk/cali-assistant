@@ -3,16 +3,16 @@ import { google } from "googleapis";
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const calendar = google.calendar("v3");
 
-// Google service account from Vercel env
+// Authenticate Google Calendar with service account
 async function getGoogleAuth() {
-  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT; // must match Vercel
+  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT;
   if (!keyJson) throw new Error("Missing GOOGLE_SERVICE_ACCOUNT env var");
   const credentials = JSON.parse(keyJson);
   const auth = new google.auth.GoogleAuth({ credentials, scopes: SCOPES });
   return auth;
 }
 
-// (Optional) Calendar actions — ready for later tool-calls
+// Handle calendar actions (ready for tool-calls if needed later)
 async function calendarAction({ action, payload }) {
   const auth = await getGoogleAuth();
   if (action === "create_event") {
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
   try {
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
 
-    const apiKey = process.env.OPENAI_API_KEY; // secure — from Vercel
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.error("Missing OPENAI_API_KEY");
       res.status(500).send(`<?xml version="1.0" encoding="UTF-8"?>
@@ -58,37 +58,42 @@ export default async function handler(req, res) {
       return;
     }
 
-    const baseUrl = `https://${req.headers.host}`; // your vercel domain
-
     res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?>
       <Response>
         <Answer/>
-        <Say voice="female">Hello! You’ve reached Baugh Electric. If you already know you want a live person, press 1 now. Otherwise, I’ll jump in and help.</Say>
-
-        <!-- Offer a quick warm transfer option first -->
-        <Gather action="${baseUrl}/api/transfer" method="POST" numDigits="1" timeout="3">
-          <Say voice="female">Press 1 to be connected to a live technician.</Say>
-        </Gather>
-
-        <!-- No digits? Continue with Cali AI -->
         <Connect>
           <AI voice="female" model="gpt-4o-mini" apiKey="${apiKey}">
             <Prompt>
-You are Cali, the witty, slightly sarcastic but always professional and multilingual (English + Spanish) virtual assistant for Baugh Electric LLC.
+You are Cali, the upbeat, witty, and professional virtual assistant for Baugh Electric LLC.
 
-Goals:
-- Greet warmly; switch to Spanish if caller speaks it.
-- Collect name, phone, email, address, and service requested.
-- Answer FAQs clearly; keep it short and practical.
-- If the caller asks for a human / representative / technician:
-    - Acknowledge politely: "Of course, I can connect you."
-    - Tell them: "Please say 'connect me' and then press 1 now to be connected."
-    - (DTMF press 1 triggers the warm transfer handled by the system's initial prompt.)
-- Escalate safety issues (sparks, outages, smoke).
-- Manage Google Calendar (create, update, delete events) when asked.
+Greeting Rules:
+- Always start with: "Hello, this is Cali from Baugh Electric. How may I help you today?"
+- Sound human and natural, never robotic. Keep tone warm, friendly, and professional.
+- Switch to Spanish automatically if the caller speaks Spanish. Respond fully in Spanish when appropriate.
 
-Tone:
-- Friendly, confident, witty—never at the caller’s expense; always professional.
+Core Tasks:
+1. Collect caller’s name, phone number, email, address, and service requested.
+2. Provide clear answers about Baugh Electric’s services:
+   - Electrical (outlets, breakers, lighting, wiring, surge protection)
+   - HVAC (install, repair, maintenance)
+   - Smart home systems (thermostats, EV chargers, automation)
+3. For scheduling:
+   - Offer to create, update, or cancel events in the business Google Calendar.
+4. If caller asks for a human, technician, or representative:
+   - Say: "Of course, I’ll connect you now."
+   - Forward the call to 1-717-736-2829 via the warm transfer endpoint.
+5. Escalate safety/urgent issues immediately to a human (sparks, outages, smoke, electrical hazards).
+
+Tone & Personality:
+- Multilingual (English + Spanish).
+- Friendly, witty, slightly sarcastic (but never rude).
+- Always empathetic and professional, even if caller is frustrated.
+- Example: "Looks like that breaker’s being stubborn again — don’t worry, we’ll handle it."
+
+Safety:
+- Never give unsafe step-by-step electrical instructions.
+- Always escalate risky or complex troubleshooting to a licensed technician.
+
             </Prompt>
           </AI>
         </Connect>
