@@ -1,13 +1,9 @@
 {
   "name": "cali-assistant",
   "version": "1.0.0",
-  "type": "module",
-  "main": "api/webhook.js",
-  "scripts": {
-    "start": "vercel dev"
-  },
+  "private": true,
+  "type": "commonjs",
   "dependencies": {
     "googleapis": "^126.0.1"
   }
 }
-
